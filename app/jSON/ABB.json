@@ -1,0 +1,22 @@
+{
+    "company": "ABB",
+    "description": "Pioneering technology leader energizing the transformation of society and industry.",
+    "location": "Zurich, Switzerland",
+    "recent_projects": [
+        {
+            "title": "SunZia HVDC Transmission",
+            "details": "Supplying converter stations for a 3,000 MW bipole system spanning 550 miles. Uses VSC technology for renewable integration."
+        },
+        {
+            "title": "Smart Factory AI",
+            "details": "Using machine learning to cut energy use by 40% across global manufacturing using digital twin technology."
+        }
+    ],
+    "tech_stack": ["SCADA", "PLC", "Python", "Azure IoT", "C++", "Robotics"],
+    "recruiter_tips": [
+        "Ask about the ABB Ability™ platform and how engineers use it.",
+        "Mention interest in the transition to software-defined industrial automation.",
+        "Highlight experience with sustainable energy systems."
+    ]
+
+}
