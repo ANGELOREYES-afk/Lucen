@@ -7,7 +7,7 @@ import test from "node:test";
 
 export default function DemoPage() {
   type Bullet = { title: string; body: string };
-  const [chatInput, setChatInput] = useState("What do I say to a ABB Recruiter?");
+  const [chatInput, setchatInput] = useState("What do I say to a ABB Recruiter?");
   const [response, setResponse] = useState<Bullet[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [stringtry, setstring] = useState<string | null>(null);
@@ -251,7 +251,7 @@ export default function DemoPage() {
               <input 
                 type="text" 
                 value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
+                onChange={(e) => setchatInput(e.target.value)}
                 onKeyDown={(e) => e.key == "Enter" && handleAsk()}
                 disabled={isLoading}
                 className="w-full bg-transparent text-white p-4 pr-12 focus:outline-none text-lg placeholder:text-gray-600"
