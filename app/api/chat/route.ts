@@ -35,37 +35,39 @@ export async function POST(req: Request) {
       .map((match) => match.metadata?.text)
       .join("\n\n");
 
-    // 4. Send to GPT-4 with the context
+    // 4. Send to GPT-4 with the context from pinecone
+    const systemPrompt = `You are Lucen, an expert engineering career coach. 
+      Analyze the provided context about ABB and the user's question.
+      Your response must be a JSON object that follows this structure: 
+      - A root object with a single key "sections".
+      - "sections" is an array of 2-3 objects.
+      - Each object must have a "title", "subtitle", and "content" key.
+      If the answer isn't in the context, create a section explaining that and offering general advice.
+    
+      Context:
+      ${contextText}`;
+
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
+      model: "gpt-4-turbo", // Or another model that supports JSON mode
+      response_format: { type: "json_object" }, // This is the magic part!
       messages: [
-        {
-          role: "system",
-          content: `You are Lucen, an expert engineering career coach. 
-          Use the following context about ABB to answer the student's question. 
-          If the answer isn't in the context, say you don't have that specific data yet but offer general advice. 
-          Can you split response between subtitle: blah blah "," content: blah blah 
-          if you have multiple points to send out please have ";;" inbetween each set of subtitle/content for splitting purposes and keep ","
-          
-          Context Data:
-          ${contextText}`
-        },
-        {
-          role: "user",
-          content: message
-        }
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message }
       ],
     });
+    
+    // The response is already a JSON string, so we parse it before sending
+    const jsonResponse = JSON.parse(completion.choices[0].message.content || '{}');
 
-    return NextResponse.json({ 
-      response: completion.choices[0].message.content 
-    });
+    // Return the structured JSON directly to the frontend
+    return NextResponse.json(jsonResponse);
+
+    // return NextResponse.json({ 
+    //   response: completion.choices[0].message.content 
+    // });
 
   } catch (error) {
     console.error("Error:", error);
-    return NextResponse.json(
-      { error: "Something went wrong." }, 
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
   }
 }

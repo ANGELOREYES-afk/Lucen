@@ -3,43 +3,37 @@
 import { useState } from "react";
 import { ChatBullet } from "../components/subcomponents/chatdivs";
 import Navbar from "../components/Navbar"; // Assuming you have this
-import test from "node:test";
+import ThinkingHeader from "../components/subcomponents/thinkingheader";
+import Carousel from "../components/subcomponents/carousel";
+
 
 export default function DemoPage() {
-  type Bullet = { title: string; body: string };
+  type Section = {
+    title: string;
+    subtitle: string;
+    content: string;
+  };
+
   const [chatInput, setchatInput] = useState("What do I say to a ABB Recruiter?");
-  const [response, setResponse] = useState<Bullet[] | null>(null);
+  const [header, setHeader] = useState(["Looking through Newsletter...", "Searching through our indexes...", "Checking up on ABB's page..", "Discovering the complexity of your question.."] )
   const [isLoading, setIsLoading] = useState(false);
-  const [stringtry, setstring] = useState<string | null>(null);
+  const [sections, setSections] = useState<Section[] | null>(null);
 
+  const [images, setImages] = useState<string[]| null>(null);
 
-  function parseRawText(text: string): Bullet[] {
-    if(!text) return [];
-
-    return text
-      .split(";;")
-      .map(section => section.trim())
-      .filter(section => section.length > 0)
-      .map(section => {
-        const titleMatch = section.match(/Subtitle\s*:\s*(.*?)(?:,?\s*Content\s*:|$)/i);
-        const subtitleMatch = section.match(/Content\s*:\s*(.*)/i);
-
-        if(titleMatch && subtitleMatch) {
-          return {
-            title: titleMatch[1].trim(),
-            body: subtitleMatch[1].trim()
-          };
-        }
-        return null;
-      })
-      .filter((item): item is Bullet => item !== null)
+  const setNull = () => {
+    setSections(null)
   }
+  const handle_both = () => {
+    handleAsk()
+  }
+
 
   const handleAsk = async () => {
     if(!chatInput.trim()) return
     setIsLoading(true);
-    setResponse(null);
-    setstring(null);
+    //setResponse(null);
+    setSections(null);
 
     try {
       const res = await fetch("/api/chat", {
@@ -47,13 +41,13 @@ export default function DemoPage() {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({message: chatInput}),
       });
-      const data = await res.json() 
+      const data: { sections: Section[] } = await res.json();
 
-      const bullets = parseRawText(data.response)
-      setResponse(bullets)
+      //const bullets = parseRawText(data.response)
+      setSections(data.sections)
+      //setResponse(bullets)
       //setstring(data.response)
 
-      console.log("hello?")
     }catch(error){
       console.error("Failed to fetch response", error)
       console.log("full error message: ", JSON.stringify(error), Object.getOwnPropertyNames(error))
@@ -208,19 +202,21 @@ export default function DemoPage() {
           </h2>
 
           {/* Dynamic Display Area */}
-          {response ? (
+          {(sections || isLoading) ? (
           <div className="w-full max-w-2xl mb-8 p-6 bg-zinc-900 border border-purple-500/30 rounded-2xl animate-fade-in">
             <h4 className="text-purple-400 text-sm font-semibold mb-2">Lucen AI</h4>
-            {response.map((b, i) => (
+            {header && !sections && <ThinkingHeader thoughts={header}/>}
+            {header && !sections && <Carousel />}
+            {sections && sections.map((b, i) => (
               <ChatBullet
                 key={i}
                 index={i + 1}
                 title={b.title}
-                body={b.body}
+                body={`${b.subtitle}. ${b.content}`}
               />
             ))}
             <button 
-              onClick={() => setResponse(null)} 
+              onClick={() => setNull()} 
               className="mt-4 text-xs text-gray-500 hover:text-white"
             >
               Ask another question
@@ -258,7 +254,7 @@ export default function DemoPage() {
                 placeholder="Ask anything..."
               />
               
-              <button onClick={handleAsk} disabled={isLoading} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-purple-400 hover:bg-white/5 rounded-lg transition-colors">
+              <button onClick={handle_both} disabled={isLoading} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-purple-400 hover:bg-white/5 rounded-lg transition-colors">
                 {isLoading ? (
                  // Loading Spinner Icon
                  <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
